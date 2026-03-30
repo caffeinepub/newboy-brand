@@ -11,40 +11,40 @@ const ZORA_URL = "https://zora.co/newboy01";
 const TWITTER_URL = "https://twitter.com/YusufAbdul1111";
 const SITE_URL = "https://electronic-jade-kgc-draft.caffeine.xyz";
 
-const STATIC_FALLBACK = [
+const STATIC_NFTS = [
   {
-    id: 1,
-    title: "Crystal Creature",
-    image: "/assets/uploads/newest-019d3b23-fb6d-709f-8948-ae2b21fee14a-1.jpg",
-    glow: "card-cyan",
+    id: 0n,
+    title: "Newest",
+    imageUrl: "/assets/newest-019d4118-27af-75ab-ae1f-fe424a4344ec.jpg",
   },
   {
-    id: 2,
+    id: 1n,
+    title: "Newboy Explorer",
+    imageUrl:
+      "/assets/file_00000000d0107243ab8342da361cdc18-019d4118-474e-75e0-8d48-e5d7116f7555.png",
+  },
+  {
+    id: 2n,
     title: "Antique Coin",
-    image:
-      "/assets/uploads/antique_coin_with_carved_portrait-019d3b24-8961-7468-8618-b1a29b37f89a-2.png",
-    glow: "card-purple",
+    imageUrl:
+      "/assets/antique_coin_with_carved_portrait-019d4118-48d7-77c8-a09b-aa9e8a1de863.png",
   },
   {
-    id: 3,
+    id: 3n,
     title: "Inner Light",
-    image:
-      "/assets/uploads/newboy_new-019d3b24-9c14-77a9-868f-be737ab29c1d-3.png",
-    glow: "card-cyan",
+    imageUrl: "/assets/newboy_new-019d4118-4c79-749e-9933-9440649ab9f3.png",
   },
   {
-    id: 4,
+    id: 4n,
     title: "Gold Coin",
-    image:
-      "/assets/uploads/newboy_coin_with_embossed_portrait-019d3b24-ad42-72e9-9a47-f25d5faf50b1-4.png",
-    glow: "card-purple",
+    imageUrl:
+      "/assets/newboy_coin_with_embossed_portrait-019d4118-4cff-726d-8c36-0dfbf8d8a536.png",
   },
   {
-    id: 5,
+    id: 5n,
     title: "Ironwood x NEWBOY",
-    image:
-      "/assets/uploads/chatgpt_image_mar_4_2026_04_06_21_am-019d3b24-b58a-747a-a0f4-219d07b8d762-5.png",
-    glow: "card-cyan",
+    imageUrl:
+      "/assets/chatgpt_image_mar_4_2026_04_06_21_am-019d4118-52c8-754f-8ad6-328eb5821851.png",
   },
 ];
 
@@ -398,20 +398,20 @@ export default function App() {
     if (actor && !isFetching) fetchGallery();
   }, [actor, isFetching, fetchGallery]);
 
-  const useFallback = nftItems !== null && nftItems.length === 0;
-  const galleryItems = useFallback
-    ? STATIC_FALLBACK.map((s) => ({
-        id: BigInt(s.id),
-        title: s.title,
-        imageUrl: s.image,
-        glow: s.glow,
-      }))
-    : (nftItems ?? []).map((item, i) => ({
-        id: item.id,
-        title: item.title,
-        imageUrl: item.image.getDirectURL(),
-        glow: i % 2 === 0 ? "card-cyan" : "card-purple",
-      }));
+  const galleryItems =
+    nftItems === null
+      ? []
+      : nftItems.length === 0
+        ? STATIC_NFTS.map((item, i) => ({
+            ...item,
+            glow: i % 2 === 0 ? "card-cyan" : "card-purple",
+          }))
+        : nftItems.map((item, i) => ({
+            id: item.id,
+            title: item.title,
+            imageUrl: item.image.getDirectURL(),
+            glow: i % 2 === 0 ? "card-cyan" : "card-purple",
+          }));
 
   return (
     <div
@@ -619,7 +619,7 @@ export default function App() {
               <span className="text-cyan-glow">THE NEWBOY</span>{" "}
               <span className="text-purple-glow">COLLECTION</span>
             </h2>
-            {nftItems !== null && (
+            {nftItems !== null && galleryItems.length > 0 && (
               <p
                 className="text-xs font-display font-bold tracking-[0.3em] uppercase"
                 style={{ color: "oklch(0.82 0.18 200 / 0.7)" }}
@@ -643,6 +643,37 @@ export default function App() {
               }}
             />
           </div>
+        )}
+
+        {nftItems !== null && galleryItems.length === 0 && (
+          <FadeInSection>
+            <div
+              className="flex flex-col items-center gap-4 py-20 rounded-2xl"
+              style={{
+                border: "1px dashed oklch(0.82 0.18 200 / 0.2)",
+              }}
+              data-ocid="collection.empty_state"
+            >
+              <p
+                className="text-sm font-display font-bold tracking-[0.3em] uppercase"
+                style={{ color: "oklch(0.82 0.18 200 / 0.5)" }}
+              >
+                New drops coming soon
+              </p>
+              <p className="text-xs" style={{ color: "#A8B3C7" }}>
+                Follow{" "}
+                <a
+                  href={TWITTER_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "oklch(0.82 0.18 200)" }}
+                >
+                  @YusufAbdul1111
+                </a>{" "}
+                to be the first to know.
+              </p>
+            </div>
+          </FadeInSection>
         )}
 
         {nftItems !== null && galleryItems.length > 0 && (

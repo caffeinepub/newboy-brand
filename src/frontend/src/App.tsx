@@ -75,11 +75,12 @@ const STATIC_NFTS = [
 ];
 
 const EARLY_HOLDERS = [
-  { handle: "@cryptowalker.eth", badge: "First Believer", initials: "CW" },
-  { handle: "0x1a2b...3c4d", badge: "First Believer", initials: "0X" },
-  { handle: "@newboy_genesis", badge: "Genesis Holder", initials: "NG" },
-  { handle: "0x9f8e...7d6c", badge: "First Believer", initials: "0X" },
-  { handle: "@web3native.eth", badge: "First Believer", initials: "W3" },
+  { handle: "7evn", badge: "Early Signal", initials: "7E" },
+  { handle: "Gstyle", badge: "Early Signal", initials: "GS" },
+  { handle: "Ironwood", badge: "Early Signal", initials: "IW" },
+  { handle: "Diamondfingers", badge: "Early Signal", initials: "DF" },
+  { handle: "Topnftart", badge: "Early Signal", initials: "TN" },
+  { handle: "8bitbase", badge: "Early Signal", initials: "8B" },
 ];
 
 // ── Intro / Loading Screen ────────────────────────────────────────────────────
@@ -726,7 +727,7 @@ function EarlySignalsSection() {
           </div>
         </FadeInSection>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
           {EARLY_HOLDERS.map((holder, i) => (
             <FadeInSection key={holder.handle} delay={i * 0.08}>
               <div

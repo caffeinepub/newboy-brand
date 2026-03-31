@@ -1,5 +1,11 @@
 import { Toaster } from "@/components/ui/sonner";
-import { CheckCircle2, ExternalLink } from "lucide-react";
+import {
+  CheckCircle2,
+  ExternalLink,
+  Volume2,
+  VolumeX,
+  X as XClose,
+} from "lucide-react";
 import { AnimatePresence, motion, useInView } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SiX } from "react-icons/si";
@@ -11,41 +17,69 @@ const ZORA_URL = "https://zora.co/newboy01";
 const TWITTER_URL = "https://twitter.com/YusufAbdul1111";
 const SITE_URL = "https://electronic-jade-kgc-draft.caffeine.xyz";
 
+type GalleryNFT = {
+  id: bigint;
+  title: string;
+  imageUrl: string;
+  glow: string;
+  description: string;
+};
+
 const STATIC_NFTS = [
   {
     id: 0n,
     title: "Newest",
     imageUrl: "/assets/newest-019d4118-27af-75ab-ae1f-fe424a4344ec.jpg",
+    description:
+      "The latest emergence from the digital frontier. A raw signal caught in its earliest form, before the world caught on.",
   },
   {
     id: 1n,
     title: "Newboy Explorer",
     imageUrl:
       "/assets/file_00000000d0107243ab8342da361cdc18-019d4118-474e-75e0-8d48-e5d7116f7555.png",
+    description:
+      "An explorer by nature — mapping territory that doesn't yet have a name. This piece captures the wandering spirit of web3's earliest movers.",
   },
   {
     id: 2n,
     title: "Antique Coin",
     imageUrl:
       "/assets/antique_coin_with_carved_portrait-019d4118-48d7-77c8-a09b-aa9e8a1de863.png",
+    description:
+      "Old world meets new frontier. A carved portrait frozen in digital amber — value stored on-chain, forever.",
   },
   {
     id: 3n,
     title: "Inner Light",
     imageUrl: "/assets/newboy_new-019d4118-4c79-749e-9933-9440649ab9f3.png",
+    description:
+      "The light you carry when no one else sees it yet. This piece represents the quiet confidence of knowing you're onto something.",
   },
   {
     id: 4n,
     title: "Gold Coin",
     imageUrl:
       "/assets/newboy_coin_with_embossed_portrait-019d4118-4cff-726d-8c36-0dfbf8d8a536.png",
+    description:
+      "Minted in the early days. An embossed portrait of the Newboy identity — the face of the frontier, cast in gold on-chain.",
   },
   {
     id: 5n,
     title: "Ironwood x NEWBOY",
     imageUrl:
       "/assets/chatgpt_image_mar_4_2026_04_06_21_am-019d4118-52c8-754f-8ad6-328eb5821851.png",
+    description:
+      "A collab born from raw creative energy. Ironwood meets Newboy at the intersection of craft and code.",
   },
+];
+
+const EARLY_HOLDERS = [
+  { handle: "@cryptowalker.eth", badge: "First Believer", initials: "CW" },
+  { handle: "0x1a2b...3c4d", badge: "First Believer", initials: "0X" },
+  { handle: "@newboy_genesis", badge: "Genesis Holder", initials: "NG" },
+  { handle: "0x9f8e...7d6c", badge: "First Believer", initials: "0X" },
+  { handle: "@web3native.eth", badge: "First Believer", initials: "W3" },
 ];
 
 // ── Intro / Loading Screen ────────────────────────────────────────────────────
@@ -159,13 +193,157 @@ function ParticleCanvas() {
   );
 }
 
+// ── NFT Modal ─────────────────────────────────────────────────────────────────
+function NFTModal({
+  nft,
+  onClose,
+}: {
+  nft: GalleryNFT;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      data-ocid="nft.modal"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8"
+      style={{
+        background: "rgba(7, 10, 15, 0.92)",
+        backdropFilter: "blur(12px)",
+      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className="relative w-full max-w-lg rounded-2xl overflow-hidden"
+        style={{
+          background: "#0D1426",
+          border: "1px solid oklch(0.82 0.18 200 / 0.35)",
+          boxShadow:
+            "0 0 60px oklch(0.82 0.18 200 / 0.15), 0 30px 80px rgba(0,0,0,0.7)",
+        }}
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.92, y: 10 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          data-ocid="nft.close_button"
+          aria-label="Close NFT detail"
+          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200"
+          style={{
+            background: "rgba(7,10,15,0.85)",
+            border: "1px solid oklch(0.82 0.18 200 / 0.3)",
+            color: "oklch(0.82 0.18 200)",
+          }}
+        >
+          <XClose size={14} />
+        </button>
+
+        {/* Image */}
+        <div
+          className="relative overflow-hidden"
+          style={{ aspectRatio: "1/1" }}
+        >
+          <img
+            src={nft.imageUrl}
+            alt={nft.title}
+            className="w-full h-full object-cover"
+          />
+          {/* Edition badge */}
+          <div
+            className="absolute top-3 left-3 px-3 py-1 rounded-full font-display font-bold tracking-widest"
+            style={{
+              background: "rgba(7,10,15,0.85)",
+              border: "1px solid oklch(0.82 0.18 200 / 0.6)",
+              color: "oklch(0.82 0.18 200)",
+              backdropFilter: "blur(4px)",
+              fontSize: "0.65rem",
+            }}
+          >
+            1 / 1
+          </div>
+        </div>
+
+        {/* Info */}
+        <div className="p-6 flex flex-col gap-4">
+          <div>
+            <h3
+              className="font-display font-extrabold text-xl tracking-widest uppercase"
+              style={{ color: "#F2F7FF" }}
+            >
+              {nft.title}
+            </h3>
+            <p
+              className="text-sm mt-1 font-display font-semibold tracking-widest"
+              style={{ color: "oklch(0.82 0.18 200)" }}
+            >
+              @newboy01
+            </p>
+          </div>
+
+          <p className="text-sm leading-relaxed" style={{ color: "#A8B3C7" }}>
+            {nft.description}
+          </p>
+
+          <div className="flex items-center gap-3">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-display font-bold tracking-wider"
+              style={{
+                background: "oklch(0.82 0.22 85 / 0.12)",
+                border: "1px solid oklch(0.82 0.22 85 / 0.5)",
+                color: "oklch(0.82 0.22 85)",
+                fontSize: "0.7rem",
+              }}
+            >
+              Edition 1 / 1
+            </div>
+          </div>
+
+          <a
+            href={ZORA_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-ocid="nft.primary_button"
+            className="block text-center py-3 rounded-xl font-display font-bold text-sm tracking-widest uppercase transition-all duration-200 btn-gold"
+          >
+            Buy on Zora ↗
+          </a>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ── NFT Card ──────────────────────────────────────────────────────────────────
 function NFTCard({
   nft,
   index,
+  onSelect,
 }: {
-  nft: { id: bigint; title: string; imageUrl: string; glow: string };
+  nft: GalleryNFT;
   index: number;
+  onSelect: (nft: GalleryNFT) => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const [buyHovered, setBuyHovered] = useState(false);
@@ -173,9 +351,9 @@ function NFTCard({
   const shareUrl = `https://twitter.com/intent/tweet?text=Check%20out%20${encodeURIComponent(nft.title)}%20by%20%40newboy01%20%F0%9F%AA%99&url=${encodeURIComponent(SITE_URL)}`;
 
   return (
-    <article
+    <div
       data-ocid={`collection.item.${index + 1}`}
-      className={`${nft.glow} rounded-2xl overflow-hidden flex flex-col relative group`}
+      className={`${nft.glow} rounded-2xl overflow-hidden flex flex-col relative group cursor-pointer`}
       style={{
         transform: hovered ? "translateY(-6px)" : "translateY(0)",
         transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -187,6 +365,15 @@ function NFTCard({
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      // biome-ignore lint/a11y/noNoninteractiveTabindex: NFT card is a fully interactive clickable surface
+      tabIndex={0}
+      onClick={() => onSelect(nft)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(nft);
+        }
+      }}
     >
       {/* Image with hover overlay */}
       <div className="aspect-square overflow-hidden relative">
@@ -199,7 +386,7 @@ function NFTCard({
 
         {/* 1/1 Edition badge */}
         <div
-          className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-xs font-display font-bold tracking-widest"
+          className="absolute top-2 left-2 px-2 py-0.5 rounded-full font-display font-bold tracking-widest"
           style={{
             background: "rgba(7,10,15,0.75)",
             border: "1px solid oklch(0.82 0.18 200 / 0.5)",
@@ -238,6 +425,7 @@ function NFTCard({
                 ? "0 0 12px oklch(0.82 0.18 200 / 0.4)"
                 : "none",
             }}
+            onClick={(e) => e.stopPropagation()}
             onMouseEnter={() => setBuyHovered(true)}
             onMouseLeave={() => setBuyHovered(false)}
           >
@@ -254,6 +442,7 @@ function NFTCard({
               border: "1px solid oklch(0.62 0.22 295 / 0.6)",
               color: "oklch(0.75 0.18 295)",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
             <SiX size={11} /> Share on X
           </a>
@@ -280,7 +469,7 @@ function NFTCard({
           </p>
         </div>
       </div>
-    </article>
+    </div>
   );
 }
 
@@ -300,6 +489,506 @@ function FadeInSection({
     >
       {children}
     </motion.div>
+  );
+}
+
+// ── Social Proof Block ────────────────────────────────────────────────────────
+function SocialProofBlock() {
+  return (
+    <div className="py-6 px-6 md:px-10 max-w-6xl mx-auto">
+      <FadeInSection>
+        <div
+          className="flex flex-col sm:flex-row items-center justify-between gap-5 px-6 py-5 rounded-2xl"
+          style={{
+            background: "rgba(13, 20, 38, 0.6)",
+            border: "1px solid oklch(0.82 0.18 200 / 0.15)",
+          }}
+        >
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-1">
+            <span
+              className="text-xs font-display font-bold tracking-widest uppercase"
+              style={{ color: "oklch(0.82 0.18 200)" }}
+            >
+              6 on-chain pieces
+            </span>
+            <span
+              style={{
+                color: "oklch(0.82 0.18 200 / 0.3)",
+                fontSize: "0.6rem",
+              }}
+            >
+              ◆
+            </span>
+            <span
+              className="text-xs font-display font-semibold tracking-widest uppercase"
+              style={{ color: "#A8B3C7" }}
+            >
+              Zora verified
+            </span>
+            <span
+              style={{
+                color: "oklch(0.82 0.18 200 / 0.3)",
+                fontSize: "0.6rem",
+              }}
+            >
+              ◆
+            </span>
+            <span
+              className="text-xs font-display font-semibold tracking-widest uppercase"
+              style={{ color: "#A8B3C7" }}
+            >
+              Web3 native
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <a
+              href={TWITTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-ocid="social.link"
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-bold tracking-widest uppercase transition-all duration-200 hover:opacity-80"
+              style={{
+                background: "rgba(7,10,15,0.7)",
+                border: "1px solid oklch(0.62 0.22 295 / 0.4)",
+                color: "oklch(0.75 0.18 295)",
+              }}
+            >
+              <SiX size={12} />
+              @YusufAbdul1111
+            </a>
+            <a
+              href={ZORA_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-ocid="social.link"
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-display font-bold tracking-widest uppercase transition-all duration-200 hover:opacity-80"
+              style={{
+                background: "rgba(7,10,15,0.7)",
+                border: "1px solid oklch(0.82 0.18 200 / 0.4)",
+                color: "oklch(0.82 0.18 200)",
+              }}
+            >
+              <span className="font-black">Z</span>
+              newboy01
+            </a>
+          </div>
+        </div>
+      </FadeInSection>
+    </div>
+  );
+}
+
+// ── Lore Section ──────────────────────────────────────────────────────────────
+function LoreSection() {
+  const loreBlocks = [
+    {
+      title: "Who is Newboy?",
+      text: "A young explorer navigating the digital frontier. No fixed style. No rulebook. Just raw creative energy on-chain.",
+      accentColor: "oklch(0.82 0.18 200)",
+      borderColor: "oklch(0.82 0.18 200 / 0.25)",
+    },
+    {
+      title: "What does he represent?",
+      text: "The early mover. The person who shows up before the crowd. The builder who creates because they have to, not because it's safe.",
+      accentColor: "oklch(0.62 0.22 295)",
+      borderColor: "oklch(0.62 0.22 295 / 0.25)",
+    },
+    {
+      title: "Why should you care?",
+      text: "Because you're here now. That means something. Early is rare. And rare is valuable.",
+      accentColor: "oklch(0.82 0.22 85)",
+      borderColor: "oklch(0.82 0.22 85 / 0.25)",
+    },
+  ];
+
+  return (
+    <section
+      id="lore"
+      className="py-24 px-6 md:px-10"
+      style={{ background: "#0A0E1A" }}
+    >
+      <div className="max-w-6xl mx-auto">
+        <FadeInSection>
+          <div className="text-center mb-16">
+            <p
+              className="text-xs font-display font-bold tracking-[0.4em] uppercase mb-4"
+              style={{ color: "oklch(0.82 0.18 200 / 0.6)" }}
+            >
+              origin story
+            </p>
+            <h2
+              className="font-display font-extrabold text-3xl md:text-4xl tracking-[0.25em] uppercase mb-4"
+              style={{ color: "#F2F7FF" }}
+            >
+              <span className="text-cyan-glow">THE LORE</span>
+            </h2>
+            <div
+              className="w-16 h-0.5 mx-auto rounded-full"
+              style={{ background: "oklch(0.82 0.18 200)" }}
+            />
+          </div>
+        </FadeInSection>
+
+        {/* Pull quote */}
+        <FadeInSection delay={0.1}>
+          <div className="relative max-w-3xl mx-auto mb-20">
+            <div
+              className="absolute left-0 top-0 bottom-0 w-1 rounded-full"
+              style={{
+                background:
+                  "linear-gradient(to bottom, oklch(0.82 0.18 200), oklch(0.62 0.22 295))",
+              }}
+            />
+            <div
+              className="absolute right-0 top-0 bottom-0 w-1 rounded-full"
+              style={{
+                background:
+                  "linear-gradient(to bottom, oklch(0.82 0.18 200), oklch(0.62 0.22 295))",
+              }}
+            />
+            <blockquote
+              className="font-display text-2xl md:text-3xl lg:text-4xl font-bold leading-snug text-center px-10 py-6"
+              style={{ color: "#F2F7FF" }}
+            >
+              &ldquo;Newboy isn&apos;t just a character.{" "}
+              <span
+                className="text-cyan-glow"
+                style={{ color: "oklch(0.82 0.18 200)" }}
+              >
+                It&apos;s a phase.
+              </span>{" "}
+              A mindset. A journey from unseen to undeniable.&rdquo;
+            </blockquote>
+          </div>
+        </FadeInSection>
+
+        {/* Three blocks */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {loreBlocks.map((block, i) => (
+            <FadeInSection key={block.title} delay={i * 0.12}>
+              <div
+                className="rounded-2xl p-8 h-full flex flex-col gap-4"
+                style={{
+                  background: "rgba(13, 20, 38, 0.85)",
+                  border: `1px solid ${block.borderColor}`,
+                }}
+              >
+                <div
+                  className="w-8 h-0.5 rounded-full"
+                  style={{ background: block.accentColor }}
+                />
+                <h3
+                  className="font-display font-bold text-sm tracking-widest uppercase"
+                  style={{ color: block.accentColor }}
+                >
+                  {block.title}
+                </h3>
+                <p
+                  className="text-sm leading-relaxed flex-1"
+                  style={{ color: "#A8B3C7" }}
+                >
+                  {block.text}
+                </p>
+              </div>
+            </FadeInSection>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ── Early Signals Section ─────────────────────────────────────────────────────
+function EarlySignalsSection() {
+  return (
+    <section id="early-signals" className="py-24 px-6 md:px-10">
+      <div className="max-w-5xl mx-auto">
+        <FadeInSection>
+          <div className="text-center mb-12">
+            <p
+              className="text-xs font-display font-bold tracking-[0.4em] uppercase mb-4"
+              style={{ color: "oklch(0.62 0.22 295 / 0.7)" }}
+            >
+              recognition wall
+            </p>
+            <h2
+              className="font-display font-extrabold text-3xl md:text-4xl tracking-[0.2em] uppercase mb-3"
+              style={{ color: "#F2F7FF" }}
+            >
+              <span className="text-purple-glow">EARLY SIGNALS</span>
+            </h2>
+            <p
+              className="text-sm tracking-widest uppercase"
+              style={{ color: "#A8B3C7" }}
+            >
+              The ones who saw it first.
+            </p>
+          </div>
+        </FadeInSection>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
+          {EARLY_HOLDERS.map((holder, i) => (
+            <FadeInSection key={holder.handle} delay={i * 0.08}>
+              <div
+                className="rounded-2xl p-5 flex flex-col items-center gap-3 transition-all duration-300"
+                style={{
+                  background: "rgba(13, 20, 38, 0.85)",
+                  border: "1px solid oklch(0.62 0.22 295 / 0.25)",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget;
+                  el.style.borderColor = "oklch(0.62 0.22 295 / 0.7)";
+                  el.style.boxShadow = "0 0 20px oklch(0.62 0.22 295 / 0.2)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget;
+                  el.style.borderColor = "oklch(0.62 0.22 295 / 0.25)";
+                  el.style.boxShadow = "none";
+                }}
+              >
+                {/* Avatar */}
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center font-display font-bold text-xs tracking-widest"
+                  style={{
+                    background: "oklch(0.62 0.22 295 / 0.15)",
+                    border: "1px solid oklch(0.62 0.22 295 / 0.5)",
+                    color: "oklch(0.75 0.18 295)",
+                  }}
+                >
+                  {holder.initials}
+                </div>
+                {/* Handle */}
+                <p
+                  className="text-xs font-display font-semibold text-center leading-tight break-all"
+                  style={{ color: "#F2F7FF" }}
+                >
+                  {holder.handle}
+                </p>
+                {/* Badge */}
+                <div
+                  className="px-2.5 py-1 rounded-full font-display font-bold tracking-wider"
+                  style={{
+                    background: "oklch(0.62 0.22 295 / 0.12)",
+                    border: "1px solid oklch(0.62 0.22 295 / 0.4)",
+                    color: "oklch(0.75 0.18 295)",
+                    fontSize: "0.6rem",
+                  }}
+                >
+                  {holder.badge}
+                </div>
+              </div>
+            </FadeInSection>
+          ))}
+        </div>
+
+        <FadeInSection delay={0.45}>
+          <p
+            className="text-center text-xs font-display tracking-[0.3em] uppercase"
+            style={{ color: "oklch(0.82 0.18 200 / 0.55)" }}
+          >
+            Hold a piece.{" "}
+            <a
+              href={ZORA_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:underline"
+              style={{ color: "oklch(0.82 0.18 200)" }}
+            >
+              Get recognized.
+            </a>
+          </p>
+        </FadeInSection>
+      </div>
+    </section>
+  );
+}
+
+// ── Roadmap Section ───────────────────────────────────────────────────────────
+function RoadmapSection() {
+  const phases = [
+    {
+      number: "01",
+      subtitle: "Phase 1",
+      title: "BUILD & DROP",
+      desc: "Create, mint, and release the first on-chain pieces. Establish the Newboy identity and presence on Zora.",
+      status: "COMPLETE",
+      statusColor: "oklch(0.75 0.15 145)",
+      active: false,
+      done: true,
+    },
+    {
+      number: "02",
+      subtitle: "Phase 2",
+      title: "COMMUNITY + IDENTITY",
+      desc: "Build the early holder community. Define what Newboy represents. Grow the early signals network.",
+      status: "IN PROGRESS",
+      statusColor: "oklch(0.82 0.18 200)",
+      active: true,
+      done: false,
+    },
+    {
+      number: "03",
+      subtitle: "Phase 3",
+      title: "EXPANSION",
+      desc: "Collabs, deeper world-building, and expansion beyond the first collection into new creative territory.",
+      status: "UPCOMING",
+      statusColor: "oklch(0.55 0.04 240)",
+      active: false,
+      done: false,
+    },
+  ];
+
+  return (
+    <section id="roadmap" className="py-24 px-6 md:px-10">
+      <div className="max-w-5xl mx-auto">
+        <FadeInSection>
+          <div className="text-center mb-16">
+            <p
+              className="text-xs font-display font-bold tracking-[0.4em] uppercase mb-4"
+              style={{ color: "oklch(0.82 0.18 200 / 0.6)" }}
+            >
+              the plan
+            </p>
+            <h2
+              className="font-display font-extrabold text-3xl md:text-4xl tracking-[0.25em] uppercase mb-3"
+              style={{ color: "#F2F7FF" }}
+            >
+              <span className="text-cyan-glow">THE JOURNEY</span>
+            </h2>
+            <p
+              className="text-sm tracking-widest uppercase"
+              style={{ color: "#A8B3C7" }}
+            >
+              Where we&apos;ve been. Where we&apos;re going.
+            </p>
+          </div>
+        </FadeInSection>
+
+        {/* Desktop progress connector */}
+        <div className="hidden md:block relative mb-8">
+          <div
+            className="absolute top-6 left-[16.667%] right-[16.667%] h-px"
+            style={{ background: "oklch(0.82 0.18 200 / 0.12)" }}
+          />
+          <div
+            className="absolute top-6 left-[16.667%] h-px"
+            style={{
+              background:
+                "linear-gradient(to right, oklch(0.75 0.15 145), oklch(0.82 0.18 200))",
+              width: "33.333%",
+            }}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {phases.map((phase, i) => (
+            <FadeInSection key={phase.number} delay={i * 0.12}>
+              <div
+                className="flex flex-col gap-4"
+                data-ocid={`roadmap.item.${i + 1}`}
+              >
+                {/* Dot + mobile connector row */}
+                <div className="flex items-center gap-4 md:flex-col md:items-center md:gap-0">
+                  <div
+                    className="relative w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center font-display font-bold text-sm md:mb-4"
+                    style={{
+                      background: phase.done
+                        ? "oklch(0.75 0.15 145 / 0.15)"
+                        : phase.active
+                          ? "oklch(0.82 0.18 200 / 0.15)"
+                          : "rgba(13, 20, 38, 0.8)",
+                      border: phase.done
+                        ? "2px solid oklch(0.75 0.15 145)"
+                        : phase.active
+                          ? "2px solid oklch(0.82 0.18 200)"
+                          : "2px solid oklch(0.82 0.18 200 / 0.2)",
+                      color: phase.statusColor,
+                      boxShadow: phase.active
+                        ? "0 0 20px oklch(0.82 0.18 200 / 0.4)"
+                        : "none",
+                    }}
+                  >
+                    {phase.done ? (
+                      <CheckCircle2 size={20} />
+                    ) : (
+                      <span>{phase.number}</span>
+                    )}
+                  </div>
+                  {/* Mobile connector line */}
+                  {i < phases.length - 1 && (
+                    <div
+                      className="md:hidden flex-1 h-px"
+                      style={{
+                        background: phase.done
+                          ? "oklch(0.75 0.15 145)"
+                          : "oklch(0.82 0.18 200 / 0.15)",
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Phase card */}
+                <div
+                  className="rounded-2xl p-6 flex flex-col gap-3 flex-1"
+                  style={{
+                    background: "rgba(13, 20, 38, 0.85)",
+                    border: phase.active
+                      ? "1px solid oklch(0.82 0.18 200 / 0.5)"
+                      : phase.done
+                        ? "1px solid oklch(0.75 0.15 145 / 0.3)"
+                        : "1px solid oklch(0.82 0.18 200 / 0.1)",
+                    boxShadow: phase.active
+                      ? "0 0 30px oklch(0.82 0.18 200 / 0.12)"
+                      : "none",
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-xs font-display font-semibold tracking-widest uppercase"
+                      style={{ color: "#A8B3C7" }}
+                    >
+                      {phase.subtitle}
+                    </span>
+                    <div
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full font-display font-bold"
+                      style={{
+                        backgroundColor: phase.done
+                          ? "oklch(0.75 0.15 145 / 0.1)"
+                          : phase.active
+                            ? "oklch(0.82 0.18 200 / 0.1)"
+                            : "oklch(0.55 0.04 240 / 0.1)",
+                        color: phase.statusColor,
+                        fontSize: "0.6rem",
+                      }}
+                    >
+                      {phase.active && (
+                        <span
+                          className="w-1.5 h-1.5 rounded-full animate-pulse"
+                          style={{ background: phase.statusColor }}
+                        />
+                      )}
+                      {phase.status}
+                    </div>
+                  </div>
+                  <h3
+                    className="font-display font-bold text-sm tracking-widest uppercase"
+                    style={{ color: phase.statusColor }}
+                  >
+                    {phase.title}
+                  </h3>
+                  <p
+                    className="text-xs leading-relaxed"
+                    style={{ color: "#A8B3C7" }}
+                  >
+                    {phase.desc}
+                  </p>
+                </div>
+              </div>
+            </FadeInSection>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -323,7 +1012,6 @@ function DropAlertSection() {
             "0 0 60px oklch(0.82 0.18 200 / 0.08), 0 0 120px oklch(0.62 0.22 295 / 0.05)",
         }}
       >
-        {/* Radial glow background */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -331,21 +1019,18 @@ function DropAlertSection() {
               "radial-gradient(ellipse 70% 60% at 50% 50%, oklch(0.82 0.18 200 / 0.06) 0%, transparent 70%)",
           }}
         />
-
         <p
           className="font-display font-extrabold text-4xl md:text-5xl tracking-[0.2em] uppercase relative z-10"
           style={{ color: "oklch(0.82 0.18 200)" }}
         >
           DROP ALERTS
         </p>
-
         <p
           className="text-base md:text-lg tracking-wide relative z-10"
           style={{ color: "#A8B3C7" }}
         >
           Follow on X to be first when new pieces drop.
         </p>
-
         <a
           href={TWITTER_URL}
           target="_blank"
@@ -382,6 +1067,13 @@ export default function App() {
   const [nftItems, setNftItems] = useState<NFTItem[] | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [selectedNft, setSelectedNft] = useState<GalleryNFT | null>(null);
+  const [soundOn, setSoundOn] = useState(false);
+  const audioRef = useRef<{
+    ctx: AudioContext;
+    oscillator: OscillatorNode;
+    gain: GainNode;
+  } | null>(null);
 
   const fetchGallery = useCallback(async () => {
     if (!actor) return;
@@ -398,7 +1090,38 @@ export default function App() {
     if (actor && !isFetching) fetchGallery();
   }, [actor, isFetching, fetchGallery]);
 
-  const galleryItems =
+  const toggleSound = () => {
+    if (soundOn) {
+      if (audioRef.current) {
+        try {
+          audioRef.current.oscillator.stop();
+          audioRef.current.ctx.close();
+        } catch (_) {
+          // ignore
+        }
+        audioRef.current = null;
+      }
+      setSoundOn(false);
+    } else {
+      try {
+        const ctx = new AudioContext();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(70, ctx.currentTime);
+        gain.gain.setValueAtTime(0.03, ctx.currentTime);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start();
+        audioRef.current = { ctx, oscillator, gain };
+        setSoundOn(true);
+      } catch (_) {
+        // AudioContext not supported or blocked
+      }
+    }
+  };
+
+  const galleryItems: GalleryNFT[] =
     nftItems === null
       ? []
       : nftItems.length === 0
@@ -411,7 +1134,17 @@ export default function App() {
             title: item.title,
             imageUrl: item.image.getDirectURL(),
             glow: i % 2 === 0 ? "card-cyan" : "card-purple",
+            description:
+              "An original on-chain piece from the NEWBOY collection. A signal from the digital frontier.",
           }));
+
+  const NAV_LINKS = [
+    { label: "HOME", href: "#home" },
+    { label: "COLLECTION", href: "#collection" },
+    { label: "LORE", href: "#lore" },
+    { label: "ROADMAP", href: "#roadmap" },
+    { label: "ABOUT", href: "#about" },
+  ];
 
   return (
     <div
@@ -420,7 +1153,7 @@ export default function App() {
         background: "linear-gradient(180deg, #070A0F 0%, #0B0F1A 100%)",
       }}
     >
-      {/* Glitch + particle CSS */}
+      {/* Glitch + global CSS */}
       <style>{`
         @keyframes glitch {
           0%   { transform: translate(0); clip-path: none; filter: none; }
@@ -444,6 +1177,13 @@ export default function App() {
         {showIntro && <IntroScreen onDone={() => setShowIntro(false)} />}
       </AnimatePresence>
 
+      {/* NFT Detail Modal */}
+      <AnimatePresence>
+        {selectedNft && (
+          <NFTModal nft={selectedNft} onClose={() => setSelectedNft(null)} />
+        )}
+      </AnimatePresence>
+
       {/* Admin Panel Overlay */}
       {adminOpen && (
         <AdminPanel
@@ -452,12 +1192,12 @@ export default function App() {
         />
       )}
 
-      {/* Sticky Nav */}
+      {/* ── Sticky Nav ── */}
       <header
         data-ocid="nav.panel"
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-4"
         style={{
-          background: "rgba(7, 10, 15, 0.85)",
+          background: "rgba(7, 10, 15, 0.88)",
           backdropFilter: "blur(16px)",
           borderBottom: "1px solid oklch(0.82 0.18 200 / 0.1)",
         }}
@@ -470,11 +1210,12 @@ export default function App() {
           />
         </a>
 
-        <nav className="hidden md:flex items-center gap-8">
-          {["HOME", "COLLECTION", "ABOUT"].map((link) => (
+        {/* Desktop nav */}
+        <nav className="hidden lg:flex items-center gap-7">
+          {NAV_LINKS.map((link) => (
             <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
+              key={link.label}
+              href={link.href}
               data-ocid="nav.link"
               className="text-xs font-display font-semibold tracking-widest transition-colors duration-200"
               style={{ color: "#A8B3C7" }}
@@ -485,10 +1226,9 @@ export default function App() {
                 (e.target as HTMLElement).style.color = "#A8B3C7";
               }}
             >
-              {link}
+              {link.label}
             </a>
           ))}
-          {/* BUY nav link */}
           <a
             href={ZORA_URL}
             target="_blank"
@@ -515,14 +1255,34 @@ export default function App() {
           </a>
         </nav>
 
-        <div className="flex items-center gap-4">
+        {/* Icons + sound toggle */}
+        <div className="flex items-center gap-3">
+          {/* Ambient sound toggle */}
+          <button
+            type="button"
+            onClick={toggleSound}
+            data-ocid="nav.toggle"
+            aria-label={soundOn ? "Mute ambient sound" : "Play ambient sound"}
+            className="transition-colors duration-200"
+            style={{ color: soundOn ? "oklch(0.82 0.18 200)" : "#A8B3C7" }}
+          >
+            {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </button>
           <a
             href={TWITTER_URL}
             target="_blank"
             rel="noopener noreferrer"
             data-ocid="nav.link"
-            className="text-muted-foreground hover:text-neon-cyan transition-colors duration-200"
-            aria-label="Twitter"
+            className="transition-colors duration-200"
+            style={{ color: "#A8B3C7" }}
+            aria-label="X (Twitter)"
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.color =
+                "oklch(0.82 0.18 200)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "#A8B3C7";
+            }}
           >
             <SiX size={18} />
           </a>
@@ -531,20 +1291,27 @@ export default function App() {
             target="_blank"
             rel="noopener noreferrer"
             data-ocid="nav.link"
-            className="text-muted-foreground hover:text-neon-purple transition-colors duration-200"
+            className="font-black text-sm transition-colors duration-200"
+            style={{ color: "#A8B3C7" }}
             aria-label="Zora"
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.color =
+                "oklch(0.62 0.22 295)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.color = "#A8B3C7";
+            }}
           >
-            <span className="text-xs font-bold">Z</span>
+            Z
           </a>
         </div>
       </header>
 
-      {/* Hero */}
+      {/* ── 1. Hero ── */}
       <section
         id="home"
         className="relative flex flex-col items-center justify-center min-h-screen text-center px-6 pt-24 pb-20 overflow-hidden"
       >
-        {/* Particle canvas */}
         <ParticleCanvas />
 
         {/* Background radial glows */}
@@ -560,58 +1327,88 @@ export default function App() {
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative z-10 flex flex-col items-center gap-6 max-w-3xl"
+          className="relative z-10 flex flex-col items-center gap-5 max-w-4xl"
         >
+          {/* Glitch logo */}
           <img
             src="/assets/generated/newboy-logo-transparent.dim_800x400.png"
             alt="NEWBOY"
-            className="w-64 md:w-80 lg:w-96 animate-float glitch-logo"
+            className="w-52 md:w-72 lg:w-80 glitch-logo"
           />
 
+          {/* Headline */}
           <h1
-            className="font-display font-extrabold text-6xl md:text-8xl lg:text-9xl tracking-tighter uppercase text-cyan-glow"
-            style={{ color: "#F2F7FF" }}
+            className="font-display font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight uppercase text-cyan-glow leading-none"
+            style={{ color: "oklch(0.82 0.18 200)" }}
           >
-            NEWBOY
+            NEWBOY: BUILT DIFFERENT.
           </h1>
 
+          {/* Subtitle */}
           <p
-            className="text-base md:text-lg tracking-wide uppercase"
-            style={{ color: "#A8B3C7", letterSpacing: "0.15em" }}
+            className="text-base md:text-lg font-display font-light tracking-[0.22em] uppercase"
+            style={{ color: "oklch(0.75 0.04 240)" }}
           >
-            Digital Explorer.&nbsp; Random NFT Maker.&nbsp; Web3 Native.
+            For the ones who move early.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          {/* Phase Tracker Pill */}
+          <div
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full"
+            style={{
+              background: "oklch(0.82 0.18 200 / 0.08)",
+              border: "1px solid oklch(0.82 0.18 200 / 0.4)",
+            }}
+          >
+            <span
+              className="w-2 h-2 rounded-full animate-pulse flex-shrink-0"
+              style={{ background: "oklch(0.82 0.18 200)" }}
+            />
+            <span
+              className="text-xs font-display font-bold tracking-[0.25em] uppercase"
+              style={{ color: "oklch(0.82 0.18 200)" }}
+            >
+              CURRENT PHASE: EARLY SIGNALS
+            </span>
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 mt-2">
             <a
               href={ZORA_URL}
               target="_blank"
               rel="noopener noreferrer"
               data-ocid="hero.primary_button"
-              className="btn-cyan px-8 py-3 rounded-pill font-display font-bold text-sm tracking-widest uppercase inline-flex items-center gap-2"
+              className="btn-gold px-8 py-3.5 rounded-pill font-display font-black text-sm tracking-widest uppercase inline-flex items-center gap-2 justify-center"
             >
-              View on Zora <ExternalLink size={14} />
+              COLLECT <ExternalLink size={14} />
             </a>
             <a
-              href={TWITTER_URL}
+              href={ZORA_URL}
               target="_blank"
               rel="noopener noreferrer"
               data-ocid="hero.secondary_button"
-              className="btn-purple px-8 py-3 rounded-pill font-display font-bold text-sm tracking-widest uppercase inline-flex items-center gap-2"
+              className="btn-cyan px-8 py-3.5 rounded-pill font-display font-bold text-sm tracking-widest uppercase inline-flex items-center gap-2 justify-center"
             >
-              Follow on Twitter <SiX size={14} />
+              View on Zora <ExternalLink size={14} />
             </a>
           </div>
         </motion.div>
       </section>
 
-      {/* Collection Section */}
+      {/* ── 2. Collection ── */}
       <section
         id="collection"
         className="py-24 px-6 md:px-10 max-w-6xl mx-auto"
       >
         <FadeInSection>
           <div className="flex flex-col items-center gap-3 mb-16">
+            <p
+              className="text-xs font-display font-bold tracking-[0.4em] uppercase"
+              style={{ color: "oklch(0.82 0.18 200 / 0.6)" }}
+            >
+              digital artifacts
+            </p>
             <h2
               className="font-display font-extrabold text-3xl md:text-4xl tracking-widest uppercase text-center"
               style={{ color: "#F2F7FF" }}
@@ -624,7 +1421,7 @@ export default function App() {
                 className="text-xs font-display font-bold tracking-[0.3em] uppercase"
                 style={{ color: "oklch(0.82 0.18 200 / 0.7)" }}
               >
-                {galleryItems.length} PIECES
+                {galleryItems.length} PIECES · CLICK TO EXPLORE
               </p>
             )}
           </div>
@@ -636,7 +1433,7 @@ export default function App() {
             data-ocid="collection.loading_state"
           >
             <div
-              className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
+              className="w-8 h-8 rounded-full border-2 animate-spin"
               style={{
                 borderColor: "oklch(0.82 0.18 200)",
                 borderTopColor: "transparent",
@@ -649,9 +1446,7 @@ export default function App() {
           <FadeInSection>
             <div
               className="flex flex-col items-center gap-4 py-20 rounded-2xl"
-              style={{
-                border: "1px dashed oklch(0.82 0.18 200 / 0.2)",
-              }}
+              style={{ border: "1px dashed oklch(0.82 0.18 200 / 0.2)" }}
               data-ocid="collection.empty_state"
             >
               <p
@@ -677,17 +1472,29 @@ export default function App() {
         )}
 
         {nftItems !== null && galleryItems.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
             {galleryItems.map((nft, i) => (
-              <FadeInSection key={String(nft.id)} delay={i * 0.1}>
-                <NFTCard nft={nft} index={i} />
+              <FadeInSection key={String(nft.id)} delay={i * 0.08}>
+                <NFTCard nft={nft} index={i} onSelect={setSelectedNft} />
               </FadeInSection>
             ))}
           </div>
         )}
       </section>
 
-      {/* About Section */}
+      {/* ── 3. Social Proof ── */}
+      <SocialProofBlock />
+
+      {/* ── 4. Lore ── */}
+      <LoreSection />
+
+      {/* ── 5. Early Signals ── */}
+      <EarlySignalsSection />
+
+      {/* ── 6. Roadmap ── */}
+      <RoadmapSection />
+
+      {/* ── 7. About ── */}
       <section id="about" className="py-24 px-6 md:px-10 max-w-5xl mx-auto">
         <FadeInSection>
           <h2
@@ -722,9 +1529,9 @@ export default function App() {
                 style={{ color: "#A8B3C7" }}
               >
                 Newboy is just a young boy exploring the digital world and web3
-                — a random NFT maker with no particular pattern. Every piece is
-                an experiment, a moment, a signal from the frontier of the
-                decentralized web.
+                &mdash; a random NFT maker with no particular pattern. Every
+                piece is an experiment, a moment, a signal from the frontier of
+                the decentralized web.
               </p>
               <p
                 className="text-sm leading-relaxed"
@@ -749,7 +1556,7 @@ export default function App() {
                   data-ocid="about.primary_button"
                   className="btn-cyan px-6 py-2.5 rounded-pill font-display font-bold text-xs tracking-widest uppercase inline-flex items-center gap-2 justify-center"
                 >
-                  <span className="text-xs font-bold">Z</span> View on Zora
+                  <span className="font-black">Z</span> View on Zora
                 </a>
                 <a
                   href={TWITTER_URL}
@@ -774,14 +1581,14 @@ export default function App() {
         </FadeInSection>
       </section>
 
-      {/* Drop Alerts CTA */}
+      {/* ── 8. Drop Alerts CTA ── */}
       <DropAlertSection />
 
-      {/* Footer */}
+      {/* ── 9. Footer ── */}
       <footer
         className="py-10 px-6 md:px-10 mt-4"
         style={{
-          background: "rgba(7, 10, 15, 0.95)",
+          background: "rgba(7, 10, 15, 0.97)",
           borderTop: "1px solid oklch(0.82 0.18 200 / 0.1)",
         }}
       >
@@ -801,7 +1608,6 @@ export default function App() {
             >
               Built on Web3
             </p>
-            {/* Verified Creator badge */}
             <div
               className="flex items-center gap-1.5"
               style={{ color: "oklch(0.82 0.18 200)" }}
@@ -815,12 +1621,12 @@ export default function App() {
               </span>
             </div>
             <p className="text-xs" style={{ color: "#A8B3C7" }}>
-              © {new Date().getFullYear()}. Built with love using{" "}
+              &copy; {new Date().getFullYear()}. Built with ❤️ using{" "}
               <a
                 href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-neon-cyan transition-colors"
+                className="hover:underline"
                 style={{ color: "oklch(0.82 0.18 200)" }}
               >
                 caffeine.ai
@@ -834,8 +1640,16 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
               data-ocid="footer.link"
-              className="text-muted-foreground hover:text-neon-cyan transition-colors duration-200"
+              className="transition-colors duration-200"
+              style={{ color: "#A8B3C7" }}
               aria-label="Twitter"
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "oklch(0.82 0.18 200)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "#A8B3C7";
+              }}
             >
               <SiX size={18} />
             </a>
@@ -844,10 +1658,18 @@ export default function App() {
               target="_blank"
               rel="noopener noreferrer"
               data-ocid="footer.link"
-              className="text-muted-foreground hover:text-neon-purple transition-colors duration-200"
+              className="font-black text-sm transition-colors duration-200"
+              style={{ color: "#A8B3C7" }}
               aria-label="Zora"
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "oklch(0.62 0.22 295)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "#A8B3C7";
+              }}
             >
-              <span className="text-xs font-bold">Z</span>
+              Z
             </a>
             <button
               type="button"
